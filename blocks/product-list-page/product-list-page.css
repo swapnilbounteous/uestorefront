@@ -1,7 +1,19 @@
 /* Trulieve PLP theme – category/shop layout with filters and grid */
+
+/* Remove extra margin from parent elements (main, section, section > div) */
+main:has(.block.product-list-page) > div,
+main:has(.block.product-list-page) > .section,
+main:has(.block.product-list-page) .section:has(.block.product-list-page),
+main:has(.block.product-list-page) .section:has(.block.product-list-page) > div {
+  margin: 0;
+  max-width: none;
+  padding: 0;
+}
+
 .product-list-page-wrapper,
 .block.product-list-page {
   padding: 0;
+  margin: 0;
 }
 
 .block.product-list-page {
@@ -21,7 +33,7 @@
 
 .block.product-list-page .search__wrapper {
     display: grid;
-    margin-block: var(--spacing-small);
+    margin: 0;
     grid-template-areas:
         "result-info"
         "view-facets"
@@ -29,7 +41,8 @@
         "product-sort"
         "product-list"
         "pagination";
-    max-width: 1400px;
+    max-width: 100%;
+    width: 100%;
     margin-inline: auto;
     padding: 0;
 }
@@ -174,11 +187,13 @@
 .block.product-list-page .search__product-list {
     grid-area: product-list;
     margin-block-end: var(--spacing-small);
+    min-width: 0;
 }
 
-/* Product grid – Trulieve card layout */
+/* Product grid – Trulieve stretched layout (wider, more columns) */
 .block.product-list-page .search__product-list .product-discovery-product-list__grid {
     gap: var(--spacing-medium);
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
 .block.product-list-page .search__product-list .dropin-product-item-card {
@@ -236,7 +251,7 @@
     display: none;
 }
 
-/* Media Queries – Trulieve desktop layout: sidebar filters + main content */
+/* Media Queries – Trulieve desktop layout: sidebar filters + main content, stretched grid */
 @media only screen and (min-width: 768px) {
     .block.product-list-page .search__wrapper {
         grid-template-areas:
@@ -244,9 +259,10 @@
             "facets product-sort"
             "facets product-list"
             "facets pagination";
-        grid-template-columns: 260px 1fr;
+        grid-template-columns: 240px 1fr;
         column-gap: var(--spacing-medium);
         padding: 0;
+        max-width: 100%;
     }
 
     .block.product-list-page .search__result-info {
@@ -275,6 +291,7 @@
     }
 
     .block.product-list-page .search__product-list .product-discovery-product-list__grid {
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: var(--spacing-small) var(--spacing-medium);
     }
 }

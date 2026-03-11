@@ -55,41 +55,12 @@ export default async function decorate(block) {
 
   // Get variables from the URL
   const urlParams = new URLSearchParams(window.location.search);
-  // get all params
   const {
     q,
     page,
     sort,
     filter,
   } = Object.fromEntries(urlParams.entries());
-
-  // Request search based on the page type on block load
-  if (config.urlpath) {
-    // If it's a category page...
-    await search({
-      phrase: '', // search all products in the category
-      currentPage: page ? Number(page) : 1,
-      pageSize: 8,
-      sort: sort ? getSortFromParams(sort) : [{ attribute: 'position', direction: 'DESC' }],
-      filter: [
-        { attribute: 'categoryPath', eq: config.urlpath }, // Add category filter
-        ...getFilterFromParams(filter),
-      ],
-    }).catch(() => {
-      console.error('Error searching for products');
-    });
-  } else {
-    // If it's a search page...
-    await search({
-      phrase: q || '',
-      currentPage: page ? Number(page) : 1,
-      pageSize: 8,
-      sort: getSortFromParams(sort),
-      filter: getFilterFromParams(filter),
-    }).catch(() => {
-      console.error('Error searching for products');
-    });
-  }
 
   const getAddToCartButton = (product) => {
     if (product.typename === 'ComplexProductView') {
@@ -175,6 +146,30 @@ export default async function decorate(block) {
       },
     })($productList),
   ]);
+
+  // Run initial search after components are mounted so they receive search/result and stay in sync
+  const baseFilter = config.urlpath ? [{ attribute: 'categoryPath', eq: config.urlpath }] : [];
+  if (config.urlpath) {
+    await search({
+      phrase: '',
+      currentPage: page ? Number(page) : 1,
+      pageSize: 8,
+      sort: sort ? getSortFromParams(sort) : [{ attribute: 'position', direction: 'DESC' }],
+      filter: [...baseFilter, ...getFilterFromParams(filter)],
+    }).catch(() => {
+      console.error('Error searching for products');
+    });
+  } else {
+    await search({
+      phrase: q || '',
+      currentPage: page ? Number(page) : 1,
+      pageSize: 8,
+      sort: getSortFromParams(sort),
+      filter: getFilterFromParams(filter),
+    }).catch(() => {
+      console.error('Error searching for products');
+    });
+  }
 
   // Listen for search results (event is fired before the block is rendered; eager: true)
   events.on('search/result', (payload) => {
