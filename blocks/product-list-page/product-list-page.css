@@ -146,10 +146,7 @@
 
 .block.product-list-page .search__product-sort label,
 .block.product-list-page .search__product-sort .dropin-design label {
-    font-size: 1.4rem;
-    font-weight: 500;
-    color: var(--trulieve-text-muted);
-    margin: 0;
+    display: none;
 }
 
 .block.product-list-page .search__product-sort select,
