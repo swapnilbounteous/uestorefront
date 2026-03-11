@@ -183,13 +183,17 @@ export default async function decorate(block) {
 
   // Run initial search after components are mounted so they receive search/result and stay in sync
   const baseFilter = config.urlpath ? [{ attribute: 'categoryPath', eq: config.urlpath }] : [];
+  const parsedInitial = getFilterFromParams(filter || '');
+  const hasCategoryInitial = parsedInitial.some((f) => f.attribute === 'categoryPath');
+  const initialFilter = hasCategoryInitial ? parsedInitial : [...baseFilter, ...parsedInitial];
+
   if (config.urlpath) {
     await search({
       phrase: '',
       currentPage: page ? Number(page) : 1,
       pageSize: 8,
       sort: sort ? getSortFromParams(sort) : [{ attribute: 'position', direction: 'DESC' }],
-      filter: [...baseFilter, ...getFilterFromParams(filter)],
+      filter: initialFilter,
     }).catch(() => {
       console.error('Error searching for products');
     });
@@ -199,7 +203,7 @@ export default async function decorate(block) {
       currentPage: page ? Number(page) : 1,
       pageSize: 8,
       sort: getSortFromParams(sort),
-      filter: getFilterFromParams(filter),
+      filter: initialFilter,
     }).catch(() => {
       console.error('Error searching for products');
     });
@@ -229,27 +233,18 @@ export default async function decorate(block) {
   // Listen for search results (event is fired after the block is rendered; eager: false)
   events.on('search/result', (payload) => {
     const url = new URL(window.location.href);
+    const req = payload.request || {};
 
-    if (payload.request?.phrase) {
-      url.searchParams.set('q', payload.request.phrase);
-    }
+    url.searchParams.set('q', req.phrase ?? '');
+    url.searchParams.set('page', String(req.currentPage ?? 1));
+    url.searchParams.set('sort', req.sort?.length ? getParamsFromSort(req.sort) : 'position_DESC');
+    url.searchParams.set('filter', req.filter?.length ? getParamsFromFilter(req.filter) : '');
 
-    if (payload.request?.currentPage) {
-      url.searchParams.set('page', payload.request.currentPage);
-    }
-
-    if (payload.request?.sort) {
-      url.searchParams.set('sort', getParamsFromSort(payload.request.sort));
-    }
-
-    if (payload.request?.filter) {
-      url.searchParams.set('filter', getParamsFromFilter(payload.request.filter));
-    }
-
-    if (isSyncingFromUrl) {
-      window.history.replaceState({}, '', url.toString());
+    const newHref = url.toString();
+    if (isSyncingFromUrl || newHref === window.location.href) {
+      window.history.replaceState({}, '', newHref);
     } else {
-      window.history.pushState({}, '', url.toString());
+      window.history.pushState({}, '', newHref);
     }
   }, { eager: false });
 
@@ -260,18 +255,21 @@ export default async function decorate(block) {
     const q = params.get('q');
     const page = params.get('page');
     const sort = params.get('sort');
-    const filter = params.get('filter');
+    const filterParam = params.get('filter');
 
     const baseFilter = config.urlpath
       ? [{ attribute: 'categoryPath', eq: config.urlpath }]
       : [];
+    const parsedFilters = getFilterFromParams(filterParam || '');
+    const hasCategoryInUrl = parsedFilters.some((f) => f.attribute === 'categoryPath');
+    const filter = hasCategoryInUrl ? parsedFilters : [...baseFilter, ...parsedFilters];
 
     search({
       phrase: q || '',
       currentPage: page ? Number(page) : 1,
       pageSize: 8,
       sort: sort ? getSortFromParams(sort) : (config.urlpath ? [{ attribute: 'position', direction: 'DESC' }] : []),
-      filter: [...baseFilter, ...getFilterFromParams(filter || '')],
+      filter,
     }).catch(() => {
       console.error('Error searching for products');
     }).finally(() => {
@@ -325,40 +323,37 @@ function getParamsFromSort(sort) {
 }
 
 function getFilterFromParams(filterParam) {
-  if (!filterParam) return [];
+  if (!filterParam || typeof filterParam !== 'string') return [];
 
-  // Decode the URL-encoded parameter
-  const decodedParam = decodeURIComponent(filterParam);
+  const decodedParam = decodeURIComponent(filterParam.trim());
+  if (!decodedParam) return [];
+
   const results = [];
   const filters = decodedParam.split('|');
 
-  filters.forEach((filter) => {
-    if (filter.includes(':')) {
-      const [attribute, value] = filter.split(':');
+  filters.forEach((part) => {
+    const colonIdx = part.indexOf(':');
+    if (colonIdx === -1) return;
+    const attribute = part.slice(0, colonIdx).trim();
+    const value = part.slice(colonIdx + 1).trim();
+    if (!attribute || value === undefined) return;
 
-      if (value.includes(',')) {
-        // Handle array values (like categories)
-        results.push({
-          attribute,
-          in: value.split(','),
-        });
-      } else if (value.includes('-')) {
-        // Handle range values (like price)
-        const [from, to] = value.split('-');
-        results.push({
-          attribute,
-          range: {
-            from: Number(from),
-            to: Number(to),
-          },
-        });
-      } else {
-        // Handle single values (like categories with one value)
-        results.push({
-          attribute,
-          in: [value],
-        });
-      }
+    if (value.includes(',')) {
+      results.push({
+        attribute,
+        in: value.split(',').map((v) => v.trim()).filter(Boolean),
+      });
+    } else if (value.includes('-') && /^\d+(\.\d+)?-\d+(\.\d+)?$/.test(value)) {
+      const [from, to] = value.split('-').map(Number);
+      results.push({
+        attribute,
+        range: { from, to },
+      });
+    } else {
+      results.push({
+        attribute,
+        in: [value],
+      });
     }
   });
 
@@ -368,15 +363,16 @@ function getFilterFromParams(filterParam) {
 function getParamsFromFilter(filter) {
   if (!filter || filter.length === 0) return '';
 
-  return filter.map(({ attribute, in: inValues, range }) => {
-    if (inValues) {
+  return filter.map(({ attribute, eq, in: inValues, range }) => {
+    if (eq != null && eq !== '') {
+      return `${attribute}:${String(eq).trim()}`;
+    }
+    if (inValues && inValues.length) {
       return `${attribute}:${inValues.join(',')}`;
     }
-
-    if (range) {
+    if (range != null) {
       return `${attribute}:${range.from}-${range.to}`;
     }
-
     return null;
   }).filter(Boolean).join('|');
 }
