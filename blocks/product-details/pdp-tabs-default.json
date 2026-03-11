@@ -1,0 +1,32 @@
+{
+  "tabs": [
+    {
+      "id": "brand-info",
+      "label": "Brand Info",
+      "content": {
+        "brandName": "Adobe",
+        "description": "Quality products designed for comfort and style. Our brand is committed to sustainable materials and lasting craftsmanship.",
+        "founded": "2020",
+        "headquarters": "San Jose, CA",
+        "values": ["Quality", "Sustainability", "Customer First"]
+      }
+    },
+    {
+      "id": "product-details",
+      "label": "Product Details",
+      "content": {
+        "description": "This product meets our high standards for materials and construction. Care instructions are included with your order.",
+        "materials": "See product description",
+        "care": "Machine wash cold. Tumble dry low. Do not bleach.",
+        "shipping": "Ships within 2-3 business days. Free returns within 30 days."
+      }
+    },
+    {
+      "id": "reviews",
+      "label": "Reviews",
+      "content": {
+        "placeholder": "Customer reviews will appear here. Be the first to review this product!"
+      }
+    }
+  ]
+}

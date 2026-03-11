@@ -58,6 +58,111 @@ function isProductPrerendered() {
   }
 }
 
+// Default tab content when no block content exists (Trulieve-style Brand Info tabs)
+const DEFAULT_PDP_TABS = {
+  tabs: [
+    {
+      id: 'brand-info',
+      label: 'Brand Info',
+      content: {
+        brandName: 'Our Brand',
+        description: 'Quality products designed for comfort and style. We are committed to sustainable materials and lasting craftsmanship.',
+        founded: '2020',
+        headquarters: 'California, USA',
+        values: ['Quality', 'Sustainability', 'Customer First'],
+      },
+    },
+    {
+      id: 'product-details',
+      label: 'Product Details',
+      content: {
+        description: 'This product meets our high standards for materials and construction. Care instructions are included with your order.',
+        materials: 'See product description',
+        care: 'Machine wash cold. Tumble dry low. Do not bleach.',
+        shipping: 'Ships within 2-3 business days. Free returns within 30 days.',
+      },
+    },
+    {
+      id: 'reviews',
+      label: 'Reviews',
+      content: { placeholder: 'Customer reviews will appear here. Be the first to review this product!' },
+    },
+  ],
+};
+
+function renderPdpTabs(block, product) {
+  const tabsContainer = block.querySelector('.product-details__tabs');
+  const headersEl = block.querySelector('.product-details__tabs-headers');
+  const panelsEl = block.querySelector('.product-details__tabs-panels');
+  if (!tabsContainer || !headersEl || !panelsEl) return;
+
+  let tabsData = DEFAULT_PDP_TABS.tabs;
+  const brandAttr = product?.attributes?.find((a) => a.name === 'brand' || a.name === 'Brand');
+  if (brandAttr?.value) {
+    tabsData = tabsData.map((tab) => (tab.id === 'brand-info'
+      ? { ...tab, content: { ...tab.content, brandName: brandAttr.value } }
+      : tab));
+  }
+
+  headersEl.innerHTML = '';
+  panelsEl.innerHTML = '';
+  tabsData.forEach((tab, index) => {
+    const isFirst = index === 0;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = `product-details__tab-btn${isFirst ? ' product-details__tab-btn--active' : ''}`;
+    btn.textContent = tab.label;
+    btn.setAttribute('aria-selected', isFirst);
+    btn.setAttribute('aria-controls', `pdp-tab-panel-${tab.id}`);
+    btn.setAttribute('id', `pdp-tab-${tab.id}`);
+    btn.dataset.tabId = tab.id;
+    headersEl.appendChild(btn);
+
+    const panel = document.createElement('div');
+    panel.id = `pdp-tab-panel-${tab.id}`;
+    panel.className = `product-details__tab-panel${isFirst ? ' product-details__tab-panel--active' : ''}`;
+    panel.setAttribute('role', 'tabpanel');
+    panel.setAttribute('aria-labelledby', `pdp-tab-${tab.id}`);
+    panel.hidden = !isFirst;
+
+    const c = tab.content;
+    if (typeof c === 'object' && c.placeholder) {
+      panel.innerHTML = `<p class="product-details__tab-placeholder">${c.placeholder}</p>`;
+    } else if (typeof c === 'object') {
+      const entries = Object.entries(c).filter(([, v]) => v != null && v !== '');
+      panel.innerHTML = entries.map(([k, v]) => {
+        const label = k.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase());
+        const val = Array.isArray(v) ? v.join(', ') : String(v);
+        return `<p class="product-details__tab-row"><strong>${label}:</strong> ${val}</p>`;
+      }).join('');
+    } else {
+      panel.textContent = c;
+    }
+    panelsEl.appendChild(panel);
+  });
+
+  headersEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.product-details__tab-btn');
+    if (!btn) return;
+    const tabId = btn.dataset.tabId;
+    headersEl.querySelectorAll('.product-details__tab-btn').forEach((b) => {
+      b.classList.remove('product-details__tab-btn--active');
+      b.setAttribute('aria-selected', 'false');
+    });
+    panelsEl.querySelectorAll('.product-details__tab-panel').forEach((p) => {
+      p.classList.remove('product-details__tab-panel--active');
+      p.hidden = true;
+    });
+    btn.classList.add('product-details__tab-btn--active');
+    btn.setAttribute('aria-selected', 'true');
+    const panel = panelsEl.querySelector(`#pdp-tab-panel-${tabId}`);
+    if (panel) {
+      panel.classList.add('product-details__tab-panel--active');
+      panel.hidden = false;
+    }
+  });
+}
+
 // Function to update the Add to Cart button text
 function updateAddToCartButtonText(addToCartInstance, inCart, labels) {
   const buttonText = inCart
@@ -82,7 +187,7 @@ export default async function decorate(block) {
   // State to track if we are in update mode
   let isUpdateMode = false;
 
-  // Layout
+  // Layout (Trulieve-style: gallery + tabs at bottom for Brand Info)
   const fragment = document.createRange().createContextualFragment(`
     <div class="product-details__alert"></div>
     <div class="product-details__wrapper">
@@ -106,6 +211,10 @@ export default async function decorate(block) {
         <div class="product-details__description"></div>
         <div class="product-details__attributes"></div>
       </div>
+    </div>
+    <div class="product-details__tabs" data-block-name="product-details-tabs">
+      <div class="product-details__tabs-headers"></div>
+      <div class="product-details__tabs-panels"></div>
     </div>
   `);
 
@@ -171,9 +280,9 @@ export default async function decorate(block) {
       slots: gallerySlots,
     })($galleryMobile),
 
-    // Gallery (Desktop)
+    // Gallery (Desktop) – Trulieve-style: thumbnails row at bottom
     pdpRendered.render(ProductGallery, {
-      controls: 'thumbnailsColumn',
+      controls: 'thumbnailsRow',
       arrows: true,
       peak: true,
       gap: 'small',
@@ -224,6 +333,9 @@ export default async function decorate(block) {
       product,
     })($wishlistToggleBtn),
   ]);
+
+  // Trulieve-style tabs at bottom (Brand Info, Product Details, Reviews)
+  renderPdpTabs(block, product);
 
   // Configuration – Button - Add to Cart
   const addToCart = await UI.render(Button, {
