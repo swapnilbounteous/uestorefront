@@ -4,15 +4,24 @@
   --desktop-large-panel-width: 900px;
   --desktop-panel-min-height: 200px;
   --desktop-panel-max-height: 600px;
+  /* Trulieve header/footer theme */
+  --trulieve-green: #00843d;
+  --trulieve-green-hover: #006b32;
+  --trulieve-green-light: #e8f5ec;
+  --trulieve-header-bg: #ffffff;
+  --trulieve-header-border: #e0e0e0;
+  --trulieve-text: #1a1a1a;
+  --trulieve-text-muted: #5c5c5c;
 }
 
-/* header and nav layout */
+/* header and nav layout – Trulieve style */
 header .nav-wrapper {
-  background-color: var(--background-color);
+  background-color: var(--trulieve-header-bg);
   width: 100%;
   z-index: 3;
   position: fixed;
-  border-bottom: 1px solid var(--color-neutral-300);
+  border-bottom: 1px solid var(--trulieve-header-border);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 6%);
 }
 
 header nav {
@@ -141,7 +150,7 @@ header nav[aria-expanded='true'] .nav-hamburger-icon::after {
   }
 }
 
-/* brand */
+/* brand – Trulieve: logo prominent */
 header nav .nav-brand {
   min-width: 128px;
 }
@@ -152,6 +161,11 @@ header nav .nav-brand a {
   font: var(--type-headline-1-font);
   letter-spacing: var(--type-headline-1-letter-spacing);
   font-weight: bold;
+  color: var(--trulieve-green);
+}
+
+header nav .nav-brand a:hover {
+  color: var(--trulieve-green-hover);
 }
 
 li.nav-drop img {
@@ -191,6 +205,12 @@ header nav .nav-sections ul > li,
 header nav .nav-sections ul > li > a {
   font: var(--type-body-2-strong-font);
   letter-spacing: var(--type-body-2-strong-letter-spacing);
+  color: var(--trulieve-text);
+}
+
+header nav .nav-sections ul > li > a:hover {
+  color: var(--trulieve-green);
+  text-decoration: none;
 }
 
 header nav .nav-brand a:hover {
@@ -256,7 +276,7 @@ header nav .nav-sections ul > li:empty {
   }
 
   header nav .nav-sections .default-content-wrapper > ul > li[aria-expanded='true'] .submenu-wrapper {
-    background-color: var(--color-neutral-50);
+    background-color: var(--trulieve-header-bg);
     box-sizing: border-box;
     left: 0;
     max-height: var(--desktop-panel-max-height);
@@ -293,7 +313,7 @@ header nav .nav-sections ul > li:empty {
     height: 0;
     border-left: 8px solid transparent;
     border-right: 8px solid transparent;
-    border-bottom: 8px solid var(--color-neutral-500);
+    border-bottom: 8px solid var(--trulieve-green-light);
   }
 
   header nav .nav-sections .default-content-wrapper > ul > li ul > li {
@@ -303,8 +323,30 @@ header nav .nav-sections ul > li:empty {
 
   header nav .nav-sections .default-content-wrapper > ul > li:hover,
   header nav .nav-sections .nav-drop[aria-expanded='true'] {
-    background-color: var(--color-neutral-200);
+    background-color: var(--trulieve-green-light);
   }
+
+  header nav .nav-sections .default-content-wrapper > ul > li a {
+    color: var(--trulieve-text);
+  }
+
+  header nav .nav-sections .default-content-wrapper > ul > li a:hover {
+    color: var(--trulieve-green);
+  }
+}
+
+/* Trulieve: nav tools (cart, wishlist, search) */
+header nav .nav-tools-wrapper > button {
+  color: var(--trulieve-text);
+}
+
+header nav .nav-tools-wrapper > button:hover {
+  color: var(--trulieve-green);
+}
+
+header nav .nav-tools button.nav-cart-button[data-count]::after {
+  background-color: var(--trulieve-green);
+  color: #fff;
 }
 
 /* tools */
@@ -335,7 +377,7 @@ header nav .nav-tools {
 }
 
 header nav .nav-tools-wrapper > button {
-  color: var(--color-brand-700);
+  color: var(--trulieve-text);
   background: transparent;
   padding: 10px;
   border: unset;
@@ -379,6 +421,12 @@ header nav .nav-tools button.nav-search-button {
   background-image: url('../../icons/search.svg');
   background-repeat: no-repeat;
   background-position: center;
+}
+
+/* Trulieve: dropdown panels (search, minicart) */
+header nav .nav-tools-panel {
+  border: 1px solid var(--trulieve-header-border);
+  border-top: 2px solid var(--trulieve-green);
 }
 
 header .nav-search-panel {

@@ -1,7 +1,10 @@
+/* Trulieve footer theme – matches header/shop style */
 footer {
-    background-color: var(--color-neutral-100);
+    background-color: var(--trulieve-header-bg, #ffffff);
     font: var(--type-body-2-default-font);
     letter-spacing: var(--type-body-2-default-letter-spacing);
+    border-top: 1px solid var(--trulieve-header-border, #e0e0e0);
+    color: var(--trulieve-text-muted, #5c5c5c);
 }
 
 footer .footer > div {
@@ -14,9 +17,29 @@ footer .footer p {
     margin: 0;
 }
 
+footer .footer a {
+    color: var(--trulieve-green, #00843d);
+    text-decoration: none;
+}
+
+footer .footer a:hover {
+    color: var(--trulieve-green-hover, #006b32);
+    text-decoration: underline;
+}
+
+footer .footer h3,
+footer .footer h4 {
+    color: var(--trulieve-text, #1a1a1a);
+}
+
 .storeview-switcher-button {
     background: transparent;
     padding-left: 0;
+    color: var(--trulieve-green, #00843d);
+}
+
+.storeview-switcher-button:hover {
+    color: var(--trulieve-green-hover, #006b32);
 }
 
 .storeview-modal-storeview-title {

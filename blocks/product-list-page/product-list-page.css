@@ -1,3 +1,18 @@
+/* Trulieve PLP theme – category/shop layout with filters and grid */
+.block.product-list-page {
+  --trulieve-green: #00843d;
+  --trulieve-green-hover: #006b32;
+  --trulieve-green-light: #e8f5ec;
+  --trulieve-text: #1a1a1a;
+  --trulieve-text-muted: #5c5c5c;
+  --trulieve-border: #e0e0e0;
+  --trulieve-bg: #ffffff;
+  --trulieve-card-bg: #fafafa;
+  /* Override brand tokens so dropin buttons match Trulieve */
+  --color-brand-500: var(--trulieve-green);
+  --color-brand-600: var(--trulieve-green-hover);
+  --color-brand-700: var(--trulieve-green-hover);
+}
 
 .block.product-list-page .search__wrapper {
     display: grid;
@@ -9,16 +24,23 @@
         "product-sort"
         "product-list"
         "pagination";
+    max-width: 1400px;
+    margin-inline: auto;
+    padding-inline: var(--spacing-small);
 }
 
+/* Breadcrumb-style result info (Trulieve: "Home / Shop / All") */
 .block.product-list-page .search__result-info {
     grid-area: result-info;
     align-self: center;
-    margin-block-end: var(--spacing-small);
+    margin-block-end: var(--spacing-medium);
+    font-size: 1.4rem;
+    color: var(--trulieve-text-muted);
 }
 
 .block.product-list-page .search__result-info strong {
     font-weight: 600;
+    color: var(--trulieve-text);
 }
 
 .block.product-list-page .search__view-facets {
@@ -34,9 +56,9 @@
 
 .block.product-list-page .search__view-facets button[data-count]::after {
     align-items: center;
-    background-color: var(--color-brand-700);
+    background-color: var(--trulieve-green);
     border-radius: 50%;
-    color: var(--color-neutral-100);
+    color: #fff;
     content: attr(data-count);
     display: flex;
     font-size: 0.8em;
@@ -50,24 +72,58 @@
     width: 1.75em;
 }
 
+/* Filters panel – Trulieve "All Filters" style */
 .block.product-list-page .search__facets {
     grid-area: facets;
     margin-block-end: var(--spacing-small);
     display: none;
+    background: var(--trulieve-card-bg);
+    border: 1px solid var(--trulieve-border);
+    border-radius: 8px;
+    padding: var(--spacing-small);
 }
 
 .block.product-list-page .search__facets--visible {
     display: block;
 }
 
+/* Sort By: Default (Trulieve style) */
 .block.product-list-page .search__product-sort {
     grid-area: product-sort;
     margin-block-end: var(--spacing-small);
 }
 
+.block.product-list-page .search__product-sort select,
+.block.product-list-page .search__product-sort .dropin-design select {
+    border: 1px solid var(--trulieve-border);
+    border-radius: 6px;
+    padding: 0.6em 2em 0.6em 0.8em;
+    font-size: 1.4rem;
+    color: var(--trulieve-text);
+    background: var(--trulieve-bg);
+}
+
 .block.product-list-page .search__product-list {
     grid-area: product-list;
     margin-block-end: var(--spacing-small);
+}
+
+/* Product grid – Trulieve card layout */
+.block.product-list-page .search__product-list .product-discovery-product-list__grid {
+    gap: var(--spacing-medium);
+}
+
+.block.product-list-page .search__product-list .dropin-product-item-card {
+    background: var(--trulieve-card-bg);
+    border: 1px solid var(--trulieve-border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.block.product-list-page .search__product-list .dropin-product-item-card:hover {
+    box-shadow: 0 4px 12px rgb(0 0 0 / 8%);
+    border-color: var(--trulieve-green-light);
 }
 
 .block.product-list-page .search__pagination {
@@ -79,6 +135,21 @@
     display: flex;
     flex-direction: row;
     gap: var(--spacing-xxsmall);
+}
+
+.block.product-list-page .product-discovery-product-actions__add-to-cart button,
+.block.product-list-page .product-discovery-product-actions__add-to-cart a.button {
+    background-color: var(--trulieve-green) !important;
+    border-color: var(--trulieve-green) !important;
+    color: #fff !important;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.block.product-list-page .product-discovery-product-actions__add-to-cart button:hover,
+.block.product-list-page .product-discovery-product-actions__add-to-cart a.button:hover {
+    background-color: var(--trulieve-green-hover) !important;
+    border-color: var(--trulieve-green-hover) !important;
 }
 
 /* Empty State */
@@ -97,14 +168,22 @@
     display: none;
 }
 
-/* Media Queries */
+/* Media Queries – Trulieve desktop layout: sidebar filters + main content */
 @media only screen and (min-width: 768px) {
     .block.product-list-page .search__wrapper {
         grid-template-areas:
-            "result-info product-sort"
+            "result-info result-info"
+            "facets product-sort"
             "facets product-list"
-            ". pagination";
-        grid-template-columns: 270px 1fr;
+            "facets pagination";
+        grid-template-columns: 260px 1fr;
+        column-gap: var(--spacing-medium);
+        padding-inline: var(--spacing-medium);
+    }
+
+    .block.product-list-page .search__result-info {
+        padding-bottom: var(--spacing-xsmall);
+        border-bottom: 1px solid var(--trulieve-border);
     }
 
     .block.product-list-page .search__view-facets {
@@ -112,12 +191,22 @@
     }
 
     .block.product-list-page .search__facets {
-        display: unset;
-        margin-right: var(--spacing-small);
+        display: block;
+        margin-right: 0;
+        margin-block-end: 0;
+        align-self: start;
+        position: sticky;
+        top: calc(var(--nav-height, 64px) + var(--spacing-small));
     }
 
     .block.product-list-page .search__product-sort {
         display: flex;
         justify-content: flex-end;
+        align-items: center;
+        margin-block-end: var(--spacing-small);
+    }
+
+    .block.product-list-page .search__product-list .product-discovery-product-list__grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     }
 }
