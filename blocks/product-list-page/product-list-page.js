@@ -195,9 +195,10 @@ export default async function decorate(block) {
     }
   }, { eager: true });
 
+  let isSyncingFromUrl = false;
+
   // Listen for search results (event is fired after the block is rendered; eager: false)
   events.on('search/result', (payload) => {
-    // update URL with new search params
     const url = new URL(window.location.href);
 
     if (payload.request?.phrase) {
@@ -216,9 +217,70 @@ export default async function decorate(block) {
       url.searchParams.set('filter', getParamsFromFilter(payload.request.filter));
     }
 
-    // Update the URL
-    window.history.pushState({}, '', url.toString());
+    if (isSyncingFromUrl) {
+      window.history.replaceState({}, '', url.toString());
+    } else {
+      window.history.pushState({}, '', url.toString());
+    }
   }, { eager: false });
+
+  // Re-run search when URL changes (browser back/forward or external URL change)
+  function runSearchFromUrl() {
+    isSyncingFromUrl = true;
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    const page = params.get('page');
+    const sort = params.get('sort');
+    const filter = params.get('filter');
+
+    const baseFilter = config.urlpath
+      ? [{ attribute: 'categoryPath', eq: config.urlpath }]
+      : [];
+
+    search({
+      phrase: q || '',
+      currentPage: page ? Number(page) : 1,
+      pageSize: 8,
+      sort: sort ? getSortFromParams(sort) : (config.urlpath ? [{ attribute: 'position', direction: 'DESC' }] : []),
+      filter: [...baseFilter, ...getFilterFromParams(filter || '')],
+    }).catch(() => {
+      console.error('Error searching for products');
+    }).finally(() => {
+      isSyncingFromUrl = false;
+    });
+  }
+
+  window.addEventListener('popstate', runSearchFromUrl);
+
+  // Accordion: make each facet header toggle its content (after facets are rendered)
+  function initFacetAccordions() {
+    const facetEls = block.querySelectorAll('.search__facets .product-discovery-facet');
+    facetEls.forEach((facet) => {
+      const header = facet.querySelector('.product-discovery-facet__header');
+      if (!header || header.dataset.accordionInit) return;
+      header.dataset.accordionInit = 'true';
+      header.setAttribute('role', 'button');
+      header.setAttribute('tabindex', '0');
+      header.setAttribute('aria-expanded', 'true');
+      header.classList.add('search__facet-header');
+      header.addEventListener('click', (e) => {
+        e.preventDefault();
+        facet.classList.toggle('product-discovery-facet--collapsed');
+        header.setAttribute('aria-expanded', facet.classList.contains('product-discovery-facet--collapsed') ? 'false' : 'true');
+      });
+      header.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          header.click();
+        }
+      });
+    });
+  }
+
+  events.on('search/result', () => {
+    setTimeout(initFacetAccordions, 0);
+  }, { eager: true });
+  setTimeout(initFacetAccordions, 500);
 }
 
 function getSortFromParams(sortParam) {
