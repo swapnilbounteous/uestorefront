@@ -65,10 +65,10 @@ const DEFAULT_PDP_TABS = {
       id: 'brand-info',
       label: 'Brand Info',
       content: {
-        brandName: 'Our Brand',
-        description: 'Quality products designed for comfort and style. We are committed to sustainable materials and lasting craftsmanship.',
+        brandName: 'Adobe',
+        description: 'Quality products designed for comfort and style. Our brand is committed to sustainable materials and lasting craftsmanship.',
         founded: '2020',
-        headquarters: 'California, USA',
+        headquarters: 'San Jose, CA',
         values: ['Quality', 'Sustainability', 'Customer First'],
       },
     },
@@ -90,76 +90,100 @@ const DEFAULT_PDP_TABS = {
   ],
 };
 
+async function loadPdpTabsJson() {
+  const paths = [
+    (typeof import.meta !== 'undefined' && import.meta.url)
+      ? new URL('pdp-tabs-default.json', import.meta.url).href
+      : '',
+    '/blocks/product-details/pdp-tabs-default.json',
+    './pdp-tabs-default.json',
+  ].filter(Boolean);
+  for (const url of paths) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.tabs?.length) return data.tabs;
+      }
+    } catch (e) {
+      continue;
+    }
+  }
+  return DEFAULT_PDP_TABS.tabs;
+}
+
 function renderPdpTabs(block, product) {
   const tabsContainer = block.querySelector('.product-details__tabs');
   const headersEl = block.querySelector('.product-details__tabs-headers');
   const panelsEl = block.querySelector('.product-details__tabs-panels');
   if (!tabsContainer || !headersEl || !panelsEl) return;
 
-  let tabsData = DEFAULT_PDP_TABS.tabs;
-  const brandAttr = product?.attributes?.find((a) => a.name === 'brand' || a.name === 'Brand');
-  if (brandAttr?.value) {
-    tabsData = tabsData.map((tab) => (tab.id === 'brand-info'
-      ? { ...tab, content: { ...tab.content, brandName: brandAttr.value } }
-      : tab));
-  }
-
-  headersEl.innerHTML = '';
-  panelsEl.innerHTML = '';
-  tabsData.forEach((tab, index) => {
-    const isFirst = index === 0;
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = `product-details__tab-btn${isFirst ? ' product-details__tab-btn--active' : ''}`;
-    btn.textContent = tab.label;
-    btn.setAttribute('aria-selected', isFirst);
-    btn.setAttribute('aria-controls', `pdp-tab-panel-${tab.id}`);
-    btn.setAttribute('id', `pdp-tab-${tab.id}`);
-    btn.dataset.tabId = tab.id;
-    headersEl.appendChild(btn);
-
-    const panel = document.createElement('div');
-    panel.id = `pdp-tab-panel-${tab.id}`;
-    panel.className = `product-details__tab-panel${isFirst ? ' product-details__tab-panel--active' : ''}`;
-    panel.setAttribute('role', 'tabpanel');
-    panel.setAttribute('aria-labelledby', `pdp-tab-${tab.id}`);
-    panel.hidden = !isFirst;
-
-    const c = tab.content;
-    if (typeof c === 'object' && c.placeholder) {
-      panel.innerHTML = `<p class="product-details__tab-placeholder">${c.placeholder}</p>`;
-    } else if (typeof c === 'object') {
-      const entries = Object.entries(c).filter(([, v]) => v != null && v !== '');
-      panel.innerHTML = entries.map(([k, v]) => {
-        const label = k.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase());
-        const val = Array.isArray(v) ? v.join(', ') : String(v);
-        return `<p class="product-details__tab-row"><strong>${label}:</strong> ${val}</p>`;
-      }).join('');
-    } else {
-      panel.textContent = c;
+  loadPdpTabsJson().then((tabsData) => {
+    if (!tabsData?.length) tabsData = DEFAULT_PDP_TABS.tabs;
+    const brandAttr = product?.attributes?.find((a) => a.name === 'brand' || a.name === 'Brand');
+    if (brandAttr?.value) {
+      tabsData = tabsData.map((tab) => (tab.id === 'brand-info'
+        ? { ...tab, content: { ...tab.content, brandName: brandAttr.value } }
+        : tab));
     }
-    panelsEl.appendChild(panel);
-  });
 
-  headersEl.addEventListener('click', (e) => {
-    const btn = e.target.closest('.product-details__tab-btn');
-    if (!btn) return;
-    const tabId = btn.dataset.tabId;
-    headersEl.querySelectorAll('.product-details__tab-btn').forEach((b) => {
-      b.classList.remove('product-details__tab-btn--active');
-      b.setAttribute('aria-selected', 'false');
+    headersEl.innerHTML = '';
+    panelsEl.innerHTML = '';
+    tabsData.forEach((tab, index) => {
+      const isFirst = index === 0;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `product-details__tab-btn${isFirst ? ' product-details__tab-btn--active' : ''}`;
+      btn.textContent = tab.label;
+      btn.setAttribute('aria-selected', isFirst);
+      btn.setAttribute('aria-controls', `pdp-tab-panel-${tab.id}`);
+      btn.setAttribute('id', `pdp-tab-${tab.id}`);
+      btn.dataset.tabId = tab.id;
+      headersEl.appendChild(btn);
+
+      const panel = document.createElement('div');
+      panel.id = `pdp-tab-panel-${tab.id}`;
+      panel.className = `product-details__tab-panel${isFirst ? ' product-details__tab-panel--active' : ''}`;
+      panel.setAttribute('role', 'tabpanel');
+      panel.setAttribute('aria-labelledby', `pdp-tab-${tab.id}`);
+      panel.hidden = !isFirst;
+
+      const c = tab.content;
+      if (typeof c === 'object' && c.placeholder) {
+        panel.innerHTML = `<p class="product-details__tab-placeholder">${c.placeholder}</p>`;
+      } else if (typeof c === 'object') {
+        const entries = Object.entries(c).filter(([, v]) => v != null && v !== '');
+        panel.innerHTML = entries.map(([k, v]) => {
+          const label = k.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase());
+          const val = Array.isArray(v) ? v.join(', ') : String(v);
+          return `<p class="product-details__tab-row"><strong>${label}:</strong> ${val}</p>`;
+        }).join('');
+      } else {
+        panel.textContent = c;
+      }
+      panelsEl.appendChild(panel);
     });
-    panelsEl.querySelectorAll('.product-details__tab-panel').forEach((p) => {
-      p.classList.remove('product-details__tab-panel--active');
-      p.hidden = true;
+
+    headersEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('.product-details__tab-btn');
+      if (!btn) return;
+      const tabId = btn.dataset.tabId;
+      headersEl.querySelectorAll('.product-details__tab-btn').forEach((b) => {
+        b.classList.remove('product-details__tab-btn--active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      panelsEl.querySelectorAll('.product-details__tab-panel').forEach((p) => {
+        p.classList.remove('product-details__tab-panel--active');
+        p.hidden = true;
+      });
+      btn.classList.add('product-details__tab-btn--active');
+      btn.setAttribute('aria-selected', 'true');
+      const panel = panelsEl.querySelector(`#pdp-tab-panel-${tabId}`);
+      if (panel) {
+        panel.classList.add('product-details__tab-panel--active');
+        panel.hidden = false;
+      }
     });
-    btn.classList.add('product-details__tab-btn--active');
-    btn.setAttribute('aria-selected', 'true');
-    const panel = panelsEl.querySelector(`#pdp-tab-panel-${tabId}`);
-    if (panel) {
-      panel.classList.add('product-details__tab-panel--active');
-      panel.hidden = false;
-    }
   });
 }
 

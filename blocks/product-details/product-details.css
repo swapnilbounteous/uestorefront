@@ -60,15 +60,34 @@ main .block.product-details {
   color: var(--trulieve-text);
 }
 
-/* Trulieve-style image slider: main image + thumbnails row at bottom */
+/* Trulieve-style gallery: wrapper and dropin overrides */
+.product-details__gallery {
+  width: 100%;
+  min-width: 0;
+}
+
+.product-details__gallery .dropin-design,
+.product-details__gallery [class*="dropin"] {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Main carousel container: column layout (image on top, thumbnails below) */
 .product-details__gallery .pdp-carousel {
-  max-height: 60vh;
+  --width: 100%;
+  --flex-carousel: column;
+  --gap: 12px;
+  max-height: none;
+  width: 100%;
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid var(--trulieve-border, #e0e0e0);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xsmall, 8px);
+  align-items: stretch;
+  gap: 12px;
+  padding: 12px;
+  background: var(--trulieve-bg, #fff);
 }
 
 .block.product-details .product-details__left-column .product-details__gallery .pdp-carousel {
@@ -76,9 +95,43 @@ main .block.product-details {
   box-shadow: 0 2px 12px rgb(0 0 0 / 6%);
 }
 
+/* Main image area: aspect ratio and centering */
+.product-details__gallery .pdp-carousel__main,
+.product-details__gallery .pdp-carousel [class*="carousel__main"] {
+  width: 100%;
+  order: 1;
+  position: relative;
+  aspect-ratio: 1;
+  max-height: 70vh;
+  background: var(--trulieve-card-bg, #fafafa);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.product-details__gallery .pdp-carousel__main img,
+.product-details__gallery .pdp-carousel [class*="carousel__main"] img {
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
+}
+
 /* Thumbnails row at bottom (Trulieve style) */
+.product-details__gallery .pdp-carousel__thumbnails,
+.product-details__gallery .pdp-carousel [class*="thumbnails"] {
+  order: 2;
+  margin: 0;
+  padding: 8px 0 0;
+  border-top: 1px solid var(--trulieve-border, #e0e0e0);
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 60px;
+}
+
 .product-details__gallery .pdp-carousel--thumbnailsRow {
-  max-height: none;
+  align-items: stretch;
 }
 
 .product-details__gallery .pdp-carousel--thumbnailsRow .pdp-carousel__main,
@@ -86,22 +139,35 @@ main .block.product-details {
   flex: 0 0 auto;
 }
 
-.product-details__gallery .pdp-carousel__thumbnails {
-  margin-top: var(--spacing-xsmall, 8px);
-  padding-top: var(--spacing-xsmall, 8px);
-  border-top: 1px solid var(--trulieve-border, #e0e0e0);
+/* Thumbnail items: same size, bordered */
+.product-details__gallery .pdp-carousel__thumbnails [class*="thumbnail"],
+.product-details__gallery .pdp-carousel__thumbnails > div,
+.product-details__gallery .pdp-carousel__thumbnails button {
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  min-height: 56px;
+  padding: 0;
+  border: 2px solid var(--trulieve-border, #e0e0e0);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+  cursor: pointer;
 }
 
-.product-details__gallery .pdp-carousel--thumbnailsRow .pdp-carousel__thumbnails {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: var(--spacing-xxsmall, 4px);
+.product-details__gallery .pdp-carousel__thumbnails img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Arrows: keep visible */
+.product-details__gallery .pdp-carousel__button {
+  z-index: 2;
 }
 
 .product-details__gallery .pdp-overlay__content .pdp-carousel,
-.product-details__gallery .pdp-overlay__content .pdp-carousel--thumbnailsRow
-{
+.product-details__gallery .pdp-overlay__content .pdp-carousel--thumbnailsRow {
   max-height: unset;
 }
 

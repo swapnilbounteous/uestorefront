@@ -24,6 +24,30 @@ export const IMAGES_SIZES = {
   height: 1191,
 };
 
+const VALID_CURRENCY_REGEX = /^[A-Z]{3}$/;
+const FALLBACK_CURRENCY = 'USD';
+
+/**
+ * Recursively normalizes invalid currency codes (e.g. NONE, empty) to USD
+ * so Intl.NumberFormat does not throw "Invalid currency code".
+ */
+function normalizeProductCurrency(obj) {
+  if (obj === null || typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) return obj.map(normalizeProductCurrency);
+
+  const next = {};
+  for (const key of Object.keys(obj)) {
+    let val = obj[key];
+    if (key === 'currency' && typeof val === 'string' && !VALID_CURRENCY_REGEX.test(val)) {
+      val = FALLBACK_CURRENCY;
+    } else if (val !== null && typeof val === 'object') {
+      val = normalizeProductCurrency(val);
+    }
+    next[key] = val;
+  }
+  return next;
+}
+
 /**
  * Extracts the main product image URL from JSON-LD or meta tags
  * @returns {string|null} The image URL or null if not found
@@ -90,14 +114,16 @@ await initializeDropin(async () => {
   const sku = getProductSku();
   const optionsUIDs = getOptionsUIDsFromUrl();
 
-  const [product, labels] = await Promise.all([
+  const [rawProduct, labels] = await Promise.all([
     fetchProductData(sku, { optionsUIDs, skipTransform: true }).then(preloadImageMiddleware),
     fetchPlaceholders('placeholders/pdp.json'),
   ]);
 
-  if (!product?.sku) {
+  if (!rawProduct?.sku) {
     return loadErrorPage();
   }
+
+  const product = normalizeProductCurrency(rawProduct);
 
   const langDefinitions = {
     default: {
