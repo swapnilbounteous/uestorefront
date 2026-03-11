@@ -200,12 +200,81 @@ main:has(.block.product-list-page) .section:has(.block.product-list-page) > div 
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
+/* Card layout: Image → THC / Brand / Title / Weight → Price → Add to cart */
 .block.product-list-page .search__product-list .dropin-product-item-card {
+    display: flex;
+    flex-direction: column;
     background: var(--trulieve-card-bg);
     border: 1px solid var(--trulieve-border);
     border-radius: 8px;
     overflow: hidden;
     transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    height: 100%;
+}
+
+.block.product-list-page .search__product-list .dropin-product-item-card > a:first-of-type {
+    display: block;
+    flex-shrink: 0;
+}
+
+.block.product-list-page .search__product-list .dropin-product-item-card img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    display: block;
+}
+
+.block.product-list-page .search__product-list .dropin-product-item-card .product-list-page-card__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-xsmall) var(--spacing-small);
+    min-width: 0;
+}
+
+.block.product-list-page .search__product-list .dropin-product-item-card .product-list-page-card__link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.block.product-list-page .search__product-list .dropin-product-item-card .product-list-page-card__thc {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--trulieve-green);
+    margin-bottom: 2px;
+}
+
+.block.product-list-page .search__product-list .dropin-product-item-card .product-list-page-card__brand {
+    font-size: 1.2rem;
+    color: var(--trulieve-text-muted);
+    margin-bottom: 4px;
+}
+
+.block.product-list-page .search__product-list .dropin-product-item-card .product-list-page-card__title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--trulieve-text);
+    line-height: 1.3;
+    margin-bottom: 2px;
+}
+
+.block.product-list-page .search__product-list .dropin-product-item-card .product-list-page-card__weight {
+    font-size: 1.2rem;
+    color: var(--trulieve-text-muted);
+}
+
+.block.product-list-page .search__product-list .dropin-product-item-card .dropin-product-item-card__price,
+.block.product-list-page .search__product-list .dropin-product-item-card [class*="__price"] {
+    padding: 0 var(--spacing-small) var(--spacing-xsmall);
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--trulieve-text);
+}
+
+.block.product-list-page .search__product-list .dropin-product-item-card .product-discovery-product-actions {
+    padding: 0 var(--spacing-small) var(--spacing-small);
+    margin-top: auto;
 }
 
 .block.product-list-page .search__product-list .dropin-product-item-card:hover {

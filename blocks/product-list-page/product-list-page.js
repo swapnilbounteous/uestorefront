@@ -126,6 +126,50 @@ export default async function decorate(block) {
             },
           });
         },
+        ProductName: (ctx) => {
+          const { product } = ctx;
+          const link = getProductLink(product.urlKey, product.sku);
+          const attrs = product.attributes || [];
+          const getAttr = (names) => {
+            const a = attrs.find((x) => names.includes((x.name || '').toLowerCase()));
+            return a?.value ?? '';
+          };
+          const thc = getAttr(['thc', 'thc_content', 'thc_amount']);
+          const brand = getAttr(['brand']);
+          const weight = getAttr(['weight', 'size', 'capacity']);
+          const name = product.name || product.sku || '';
+
+          const wrap = document.createElement('div');
+          wrap.className = 'product-list-page-card__content';
+          const linkEl = document.createElement('a');
+          linkEl.href = link;
+          linkEl.className = 'product-list-page-card__link';
+
+          if (thc) {
+            const p = document.createElement('div');
+            p.className = 'product-list-page-card__thc';
+            p.textContent = thc;
+            linkEl.appendChild(p);
+          }
+          if (brand) {
+            const p = document.createElement('div');
+            p.className = 'product-list-page-card__brand';
+            p.textContent = brand;
+            linkEl.appendChild(p);
+          }
+          const nameEl = document.createElement('div');
+          nameEl.className = 'product-list-page-card__title';
+          nameEl.textContent = name;
+          linkEl.appendChild(nameEl);
+          if (weight) {
+            const p = document.createElement('div');
+            p.className = 'product-list-page-card__weight';
+            p.textContent = weight;
+            linkEl.appendChild(p);
+          }
+          wrap.appendChild(linkEl);
+          ctx.replaceWith(wrap);
+        },
         ProductActions: (ctx) => {
           const actionsWrapper = document.createElement('div');
           actionsWrapper.className = 'product-discovery-product-actions';
