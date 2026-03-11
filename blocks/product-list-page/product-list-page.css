@@ -293,6 +293,10 @@ main:has(.block.product-list-page) .section:has(.block.product-list-page) > div 
     gap: var(--spacing-xxsmall);
 }
 
+.block.product-list-page .product-discovery-product-actions__wishlist-toggle {
+    display: none;
+}
+
 .block.product-list-page .product-discovery-product-actions__add-to-cart button,
 .block.product-list-page .product-discovery-product-actions__add-to-cart a.button {
     background-color: var(--trulieve-green) !important;

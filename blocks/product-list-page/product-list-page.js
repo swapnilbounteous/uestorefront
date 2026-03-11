@@ -6,9 +6,6 @@ import Pagination from '@dropins/storefront-product-discovery/containers/Paginat
 import { render as provider } from '@dropins/storefront-product-discovery/render.js';
 import { Button, Icon, provider as UI } from '@dropins/tools/components.js';
 import { search } from '@dropins/storefront-product-discovery/api.js';
-// Wishlist Dropin
-import { WishlistToggle } from '@dropins/storefront-wishlist/containers/WishlistToggle.js';
-import { render as wishlistRender } from '@dropins/storefront-wishlist/render.js';
 // Cart Dropin
 import * as cartApi from '@dropins/storefront-cart/api.js';
 import { tryRenderAemAssetsImage } from '@dropins/tools/lib/aem/assets.js';
@@ -66,19 +63,21 @@ export default async function decorate(block) {
     if (product.typename === 'ComplexProductView') {
       const button = document.createElement('div');
       UI.render(Button, {
-        children: labels.Global?.AddProductToCart,
+        children: '',
         icon: Icon({ source: 'Cart' }),
         href: getProductLink(product.urlKey, product.sku),
         variant: 'primary',
+        'aria-label': labels.Global?.AddProductToCart || 'Add to cart',
       })(button);
       return button;
     }
     const button = document.createElement('div');
     UI.render(Button, {
-      children: labels.Global?.AddProductToCart,
+      children: '',
       icon: Icon({ source: 'Cart' }),
       onClick: () => cartApi.addProductsToCart([{ sku: product.sku, quantity: 1 }]),
       variant: 'primary',
+      'aria-label': labels.Global?.AddProductToCart || 'Add to cart',
     })(button);
     return button;
   };
@@ -173,18 +172,9 @@ export default async function decorate(block) {
         ProductActions: (ctx) => {
           const actionsWrapper = document.createElement('div');
           actionsWrapper.className = 'product-discovery-product-actions';
-          // Add to Cart Button
           const addToCartBtn = getAddToCartButton(ctx.product);
           addToCartBtn.className = 'product-discovery-product-actions__add-to-cart';
-          // Wishlist Button
-          const $wishlistToggle = document.createElement('div');
-          $wishlistToggle.classList.add('product-discovery-product-actions__wishlist-toggle');
-          wishlistRender.render(WishlistToggle, {
-            product: ctx.product,
-            variant: 'tertiary',
-          })($wishlistToggle);
           actionsWrapper.appendChild(addToCartBtn);
-          actionsWrapper.appendChild($wishlistToggle);
           ctx.replaceWith(actionsWrapper);
         },
       },
