@@ -17,6 +17,10 @@ main:has(.block.product-list-page) .section:has(.block.product-list-page) > div 
 }
 
 .block.product-list-page {
+  padding: var(--spacing-small, 16px) 0;
+}
+
+.block.product-list-page {
   --trulieve-green: #00843d;
   --trulieve-green-hover: #006b32;
   --trulieve-green-light: #e8f5ec;
@@ -44,7 +48,7 @@ main:has(.block.product-list-page) .section:has(.block.product-list-page) > div 
     max-width: 100%;
     width: 100%;
     margin-inline: auto;
-    padding: 0;
+    padding: 0 var(--spacing-small, 16px);
 }
 
 /* Breadcrumb-style result info (Trulieve: "Home / Shop / All") */
@@ -261,7 +265,7 @@ main:has(.block.product-list-page) .section:has(.block.product-list-page) > div 
             "facets pagination";
         grid-template-columns: 240px 1fr;
         column-gap: var(--spacing-medium);
-        padding: 0;
+        padding: 0 var(--spacing-medium, 24px);
         max-width: 100%;
     }
 
