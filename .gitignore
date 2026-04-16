@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .hlx/*
 coverage/*
 logs/*
@@ -11,3 +12,6 @@ helix-importer-ui
 # Ignore .map files in scripts/__dropins__/ directory and all its subdirectories
 scripts/__dropins__/**/*.map
 .env
+=======
+.DS_Store
+>>>>>>> 3128c3f (Initial commit)
